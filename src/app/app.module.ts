@@ -16,6 +16,7 @@ import { LeadAssessmentComponent } from './lead-assessment/lead-assessment.compo
     ReactiveFormsModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  exports: [AppComponent, LeadAssessmentComponent],
 })
 export class AppModule { }

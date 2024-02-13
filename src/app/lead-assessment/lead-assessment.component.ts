@@ -1,91 +1,83 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
-enum decision {
-  WAIT_LIST = 'WAIT_LIST', 
-  WAIT_LIST_FUTURE_CITY = 'WAIT_LIST_FUTURE_CITY', 
-  WAIT_LIST_MORE_PROPERTY_DOCS = 'WAIT_LIST_MORE_PROPERTY_DOCS', 
-  INELIGIBLE_TEMPORARY = 'INELIGIBLE_TEMPORARY', 
-  INELIGIBLE_PERMANENT = 'INELIGIBLE_PERMANENT',
-
-}
 @Component({
   selector: 'app-lead-assessment',
   templateUrl: './lead-assessment.component.html',
-  styleUrls: ['./lead-assessment.component.scss']
+  styleUrls: ['./lead-assessment.component.scss'],
 })
 export class LeadAssessmentComponent {
-  city: string = '';
-  monthlyIncome: number = 0;
-  downPaymentAmount: number = 0;
-  requestedLoanAmount: number = 0;
-  historyOfBankruptcy: boolean = false;
-  allDocumentsAvailable: boolean = true;
+  userData: FormGroup = this.createUserDataForm();
   decision: string = '';
-  decisionDetails = '';
-  leadAssessmentForm: FormGroup = this.createForm();
+
+  private INCOME_MIN = 30000;
+  private INCOME_MAX = 150000;
+  private LOAN_RATIO = 4.5;
+  private DOWNPAYMENT_MIN_RATIO = 0.2;
+  private DOWNPAYMENT_MAX_RATIO = 0.8;
+  private OPERATIONAL_CITY = 'Karachi';
 
   constructor(private fb: FormBuilder) {}
 
-  createForm() {
-    return this.fb.group({
+  createUserDataForm() {
+    return this.userData = this.fb.group({
       city: ['', Validators.required],
-      monthlyIncome: ['', [Validators.required, Validators.min(30000), Validators.max(150000)]],
-      downPaymentAmount: ['', [Validators.required]],
-      requestedLoanAmount: ['', [Validators.required, Validators.min(100000), Validators.max(3000000)]],
-      historyOfBankruptcy: [''],
-      allDocumentsAvailable: ['']
+      monthlyIncome: ['', [Validators.required, Validators.min(this.INCOME_MIN), Validators.max(this.INCOME_MAX)]],
+      downPayment: ['', Validators.required],
+      loanAmount: ['', Validators.required],
+      bankrupt: [false],
+      hasAllDocuments: [true]
     });
   }
 
-  makeDecision(): string {
-    const monthlyIncomeValue = this.leadAssessmentForm.get('monthlyIncome')?.value;
-    const requestedLoanAmountValue = this.leadAssessmentForm.get('requestedLoanAmount')?.value;
-    const downPaymentAmountValue = this.leadAssessmentForm.get('downPaymentAmount')?.value;
-    const allDocumentsAvailableValue = this.leadAssessmentForm.get('allDocumentsAvailable')?.value;
-  
-    if (this.historyOfBankruptcy) {
-      this.decisionDetails = ''
-      return decision.INELIGIBLE_PERMANENT;
+  makeDecision() {
+    if (!this.userData.valid) {
+      return;
     }
-  
-    if (!monthlyIncomeValue || monthlyIncomeValue < 30000 || monthlyIncomeValue > 150000) {
-      this.decisionDetails = 'You are temporarily ineligible for a loan because of your monthly income. Please contact us to discuss options.';
-      return decision.INELIGIBLE_TEMPORARY;
-    }
-  
-    if (!requestedLoanAmountValue || requestedLoanAmountValue < 100000 || requestedLoanAmountValue > 3000000) {
-      this.decisionDetails = 'You are temporarily ineligible for a loan because of your requested loan amount. Please contact us to discuss options.';
-      return decision.INELIGIBLE_TEMPORARY;
-    }
-  
-    if (requestedLoanAmountValue > 4.5 * monthlyIncomeValue * 12) {
-      this.decisionDetails = 'You are temporarily ineligible for a loan because of your requested loan amount. Please contact us to discuss options.';
-      return decision.INELIGIBLE_TEMPORARY;
-    }
-  
-    if (!downPaymentAmountValue || downPaymentAmountValue < requestedLoanAmountValue * 0.2 ||
-        downPaymentAmountValue > requestedLoanAmountValue * 0.8) {
-      this.decisionDetails = 'You are temporarily ineligible for a loan because of your down payment amount. Please contact us to discuss options.';
-      return decision.INELIGIBLE_TEMPORARY;
-    }
-  
-    if (!allDocumentsAvailableValue) {
-      this.decisionDetails = 'You are temporarily ineligible for a loan because of your property documents. Please contact us to discuss options.';
-      return decision.WAIT_LIST_MORE_PROPERTY_DOCS;
-    }
-  
-    if (this.city !== 'Karachi') {
-      this.decisionDetails = 'You are on the waitlist as we donot operate in your city yet. We qill keep you updated.';
-      return decision.WAIT_LIST_FUTURE_CITY;
-    }
-  
-    this.decisionDetails = 'You are eligible for the loan. We will be contacting you to schedule an appointment.';
-    return decision.WAIT_LIST;
-  }  
 
-  onSubmit() {
-      this.decision = this.makeDecision();
+    const city = this.userData.value.city;
+    const monthlyIncome = this.userData.value.monthlyIncome;
+    const downPayment = this.userData.value.downPayment;
+    const loanAmount = this.userData.value.loanAmount;
+    const isBankrupt = this.userData.value.bankrupt;
+    const hasAllDocuments = this.userData.value.hasAllDocuments;
+
+    if (isBankrupt) {
+      this.decision = 'INELIGIBLE_PERMANENT';
+    } else if (!this.isIncomeEligible(monthlyIncome)) {
+      this.decision = 'INELIGIBLE_TEMPORARY';
+    } else if (!this.isLoanAmountEligible(loanAmount, monthlyIncome)) {
+      this.decision = 'INELIGIBLE_TEMPORARY';
+    } else if (!this.isDownPaymentEligible(downPayment, loanAmount)) {
+      this.decision = 'INELIGIBLE_TEMPORARY';
+    } else if (!hasAllDocuments) {
+      this.decision = 'WAIT_LIST_MORE_PROPERTY_DOCS';
+    } else if (!this.isCityEligible(city)) {
+      this.decision = 'WAIT_LIST_FUTURE_CITY';
+    } else {
+      this.decision = 'WAIT_LIST';
+    }
+
+    console.log(this.decision);
+    
+  }
+
+  private isIncomeEligible(income: number): boolean {
+    return income >= this.INCOME_MIN && income <= this.INCOME_MAX;
+  }
+
+  private isLoanAmountEligible(loanAmount: number, income: number): boolean {
+    return loanAmount <= income * this.LOAN_RATIO;
+  }
+
+  private isDownPaymentEligible(downPayment: number, loanAmount: number): boolean {
+    const minDownPayment = loanAmount * this.DOWNPAYMENT_MIN_RATIO;
+    const maxDownPayment = loanAmount * this.DOWNPAYMENT_MAX_RATIO;
+    return downPayment >= minDownPayment && downPayment <= maxDownPayment;
+  }
+  
+  private isCityEligible(city: string): boolean {
+    return city === this.OPERATIONAL_CITY;
   }
 }

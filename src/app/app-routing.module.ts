@@ -1,11 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { LeadAssessmentComponent } from './lead-assessment/lead-assessment.component';
 
 const routes: Routes = [
-  {
-    path: 'lead-assessment',
-    loadComponent: async () => (await import('./lead-assessment/lead-assessment.component')).LeadAssessmentComponent,
-  },
+  { path: 'lead-assessment', component: LeadAssessmentComponent }
 ];
 
 @NgModule({
