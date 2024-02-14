@@ -1,5 +1,4 @@
 # Trellis Lead Assessment
 
-# Demo
-![Demo](src/assets/app-ui.png)
+# UI
 ![Demo](src/assets/lead-assessment-ui.png)
