@@ -1,2 +1,6 @@
-<button (click)="navigate()">Lead Assessment</button>
+<div *ngIf="!isOnLeadAssessmentRoute()" class="app-container">
+    <span>Welcome, please click the following button to assess your eligibility.</span>
+    <button (click)="navigate()">Assess your eligibility</button>
+</div>
+
 <router-outlet></router-outlet>

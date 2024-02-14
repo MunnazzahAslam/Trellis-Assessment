@@ -1,27 +1,47 @@
 <div class="form-container">
-  <div [formGroup]="userData">
-    <label for="city">City:</label>
-    <input type="text" id="city" formControlName="city" required>
+  <div class="form">
+    <div [formGroup]="userData">
+      <label for="city">City:</label>
+      <input type="text" id="city" formControlName="city" required>
+      <div *ngIf="userData.get('city')?.invalid && (userData.get('city')?.dirty || userData.get('city')?.touched)"
+        class="error-message">
+        <div *ngIf="userData.get('city')?.errors?.['required']">City is required</div>
+      </div>
 
-    <label for="monthlyIncome">Monthly Income:</label>
-    <input type="number" id="monthlyIncome" formControlName="monthlyIncome" required>
+      <label for="monthlyIncome">Monthly Income:</label>
+      <input type="number" id="monthlyIncome" formControlName="monthlyIncome" required>
+      <div
+        *ngIf="userData.get('monthlyIncome')?.invalid && (userData.get('monthlyIncome')?.dirty || userData.get('monthlyIncome')?.touched)"
+        class="error-message">
+        <div *ngIf="userData.get('monthlyIncome')?.errors?.['required']">Monthly income is required</div>
+      </div>
 
-    <label for="downPayment">Down Payment:</label>
-    <input type="number" id="downPayment" formControlName="downPayment" required>
+      <label for="downPayment">Down Payment:</label>
+      <input type="number" id="downPayment" formControlName="downPayment" required>
+      <div
+        *ngIf="userData.get('downPayment')?.invalid && (userData.get('downPayment')?.dirty || userData.get('downPayment')?.touched)"
+        class="error-message">
+        <div *ngIf="userData.get('downPayment')?.errors?.['required']">Downpayment amount is required</div>
+      </div>
 
-    <label for="loanAmount">Loan Amount:</label>
-    <input type="number" id="loanAmount" formControlName="loanAmount" required>
+      <label for="loanAmount">Loan Amount:</label>
+      <input type="number" id="loanAmount" formControlName="loanAmount" required>
+      <div
+        *ngIf="userData.get('loanAmount')?.invalid && (userData.get('loanAmount')?.dirty || userData.get('loanAmount')?.touched)"
+        class="error-message">
+        <div *ngIf="userData.get('loanAmount')?.errors?.['required']">Loan amount is required</div>
+      </div>
 
-    <input type="checkbox" id="bankrupt" formControlName="bankrupt">
-    <label for="bankrupt">History of Bankruptcy</label>
+      <input type="checkbox" id="bankrupt" formControlName="bankrupt">
+      <label for="bankrupt">History of Bankruptcy</label>
 
-    <br/> 
-    <input type="checkbox" id="documents" class="ml-2" formControlName="hasAllDocuments">
-    <label for="documents">All Documents Available</label>
+      <br />
+      <input type="checkbox" id="documents" class="ml-2" formControlName="hasAllDocuments">
+      <label for="documents">All Documents Available</label>
+    </div>
+
+    <button type="submit" [disabled]="!userData.valid" (click)="makeDecision()">Submit</button>
   </div>
-
-  <button type="submit" [disabled]="!userData.valid" (click)="makeDecision()">Submit</button>
-
   <div *ngIf="decision">
     Decision: {{ decision }}
   </div>

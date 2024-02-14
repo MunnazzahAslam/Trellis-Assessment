@@ -1,0 +1,27 @@
+$button-background: #007bff;
+$button-text-color: #fff;
+
+.app-container {
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 40px);
+    
+    span {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    button {
+        padding: 10px;
+        margin: 15px 0;
+        background-color: $button-background;
+        color: $button-text-color;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+}

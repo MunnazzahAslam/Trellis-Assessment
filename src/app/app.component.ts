@@ -14,4 +14,8 @@ export class AppComponent {
   navigate() {
     this.router.navigate(['/lead-assessment']);
   }
+  
+  isOnLeadAssessmentRoute(): boolean {
+    return this.router.url === '/lead-assessment';
+  }
 }

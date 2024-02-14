@@ -18,7 +18,10 @@ export class LeadAssessmentComponent {
   private DOWNPAYMENT_MAX_RATIO = 0.8;
   private OPERATIONAL_CITY = 'Karachi';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) {
+    console.log(this.userData);
+    
+  }
 
   createUserDataForm() {
     return this.userData = this.fb.group({
